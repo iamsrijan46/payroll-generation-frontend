@@ -1,0 +1,89 @@
+<div class="max-w-6xl mx-auto p-6 bg-white rounded shadow-md">
+  <h2 class="text-2xl font-semibold mb-6 text-center">Dashboard - Payroll Summary</h2>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-6 gap-4 text-center mb-8">
+    <div class="bg-blue-100 rounded p-4">
+      <div class="text-sm text-gray-600">Working Hours</div>
+      <div class="text-xl font-bold">{{ totalWorkingHours }}</div>
+    </div>
+    <div class="bg-green-100 rounded p-4">
+      <div class="text-sm text-gray-600">Working Days</div>
+      <div class="text-xl font-bold">{{ totalWorkingDays }}</div>
+    </div>
+    <div class="bg-indigo-100 rounded p-4">
+      <div class="text-sm text-gray-600">Present</div>
+      <div class="text-xl font-bold">{{ presentDays }}</div>
+    </div>
+    <div class="bg-red-100 rounded p-4">
+      <div class="text-sm text-gray-600">Absent</div>
+      <div class="text-xl font-bold">{{ absentDays }}</div>
+    </div>
+    <div class="bg-yellow-100 rounded p-4">
+      <div class="text-sm text-gray-600">Weekend</div>
+      <div class="text-xl font-bold">{{ weekendDays }}</div>
+    </div>
+    <div class="bg-purple-100 rounded p-4">
+      <div class="text-sm text-gray-600">Holidays</div>
+      <div class="text-xl font-bold">{{ holidays }}</div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Pie Chart -->
+    <div class="bg-gray-50 p-4 rounded shadow">
+      <h3 class="text-lg font-semibold text-center mb-3">Attendance Pie Chart</h3>
+      <div class="h-[300px]">
+        <canvas baseChart
+                [data]="pieChartData"
+                [options]="pieChartOptions"
+                [type]="'pie'">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="bg-gray-50 p-4 rounded shadow">
+      <h3 class="text-lg font-semibold text-center mb-3">Working Hours Bar Chart</h3>
+      <div class="h-[300px]">
+        <canvas baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                [type]="barChartType">
+        </canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <h3 class="text-lg font-semibold mt-8 mb-3">Day-wise Summary</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200">
+      <thead class="bg-gray-100">
+      <tr>
+        <th class="text-left py-2 px-4 border-b border-gray-300">Date</th>
+        <th class="text-left py-2 px-4 border-b border-gray-300">Day</th>
+        <th class="text-left py-2 px-4 border-b border-gray-300">Status</th>
+        <th class="text-left py-2 px-4 border-b border-gray-300">Working Hours</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let day of dayWiseSummary" class="hover:bg-gray-50">
+        <td class="py-2 px-4 border-b border-gray-200">{{ day.date }}</td>
+        <td class="py-2 px-4 border-b border-gray-200">{{ day.day }}</td>
+        <td class="py-2 px-4 border-b border-gray-200"
+            [ngClass]="{
+              'text-green-600 font-semibold': day.status === 'Present',
+              'text-red-600 font-semibold': day.status === 'Absent',
+              'text-yellow-600 font-semibold': day.status === 'Weekend',
+              'text-purple-600 font-semibold': day.status === 'Holiday'
+            }">
+          {{ day.status }}
+        </td>
+        <td class="py-2 px-4 border-b border-gray-200">{{ day.workingHours }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
