@@ -1,0 +1,14 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">Admin Dashboard</h2>
+
+  <div *ngFor="let emp of employees" class="border p-4 mb-4 rounded shadow-sm">
+    <p><strong>ID:</strong> {{ emp.id }}</p>
+    <p><strong>Username:</strong> {{ emp.username }}</p>
+    <p><strong>Email:</strong> {{ emp.email }}</p>
+    <input type="number" placeholder="Base Pay" #pay class="border px-2 py-1 mt-2">
+<!--    <button (click)="generatePayment(emp.id, pay.value)"-->
+<!--            class="ml-2 px-4 py-1 bg-blue-600 text-white rounded">-->
+<!--      Generate Payment-->
+<!--    </button>-->
+  </div>
+</div>
