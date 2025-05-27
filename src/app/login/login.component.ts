@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../AuthService/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -11,27 +11,35 @@ import { AuthService } from '../AuthService/auth.service';
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
-  email = '';
+  username = '';
   password = '';
-  error = '';
+  errorMsg = '';
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   login() {
-    this.authService.login(this.email, this.password).subscribe({
-      next: (res) => {
-        console.log('Login success:', res);
-        // Save token or navigate
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        console.error('Login failed', err);
-        this.error = 'Invalid credentials';
-      },
-    });
-  }
+    const loginData = { username: this.username, password: this.password };
 
-  goToSignup() {
-    this.router.navigate(['/signup']);
+    this.http.post<any>('http://localhost:8080/api/auth/login', loginData).subscribe({
+      next: (res) => {
+        if (res && res.role) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('role', res.role);
+          localStorage.setItem('username', res.username);
+
+          // ✅ Role-based navigation
+          if (res.role === 'ADMIN') {
+            this.router.navigate(['/admin-dashboard']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        } else {
+          this.errorMsg = 'Invalid login response!';
+        }
+      },
+      error: () => {
+        this.errorMsg = 'Invalid username or password!';
+      }
+    });
   }
 }
