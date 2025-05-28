@@ -1,14 +1,106 @@
-<div class="p-6 max-w-4xl mx-auto">
-  <h2 class="text-2xl font-bold mb-4">Admin Dashboard</h2>
+<div class="min-h-screen bg-gray-50 p-6 sm:p-8">
+  <div class="max-w-full"> <!-- mx-auto bg-white shadow-2xl rounded-xl overflow-hidden -->
+    <div class="p-6 sm:p-10">
+      <h1 class="text-4xl sm:text-5xl font-extra bold text-gray-800 mb-8 text-center tracking-tight">Admin Dashboard</h1>
 
-  <div *ngFor="let emp of employees" class="border p-4 mb-4 rounded shadow-sm">
-    <p><strong>ID:</strong> {{ emp.id }}</p>
-    <p><strong>Username:</strong> {{ emp.username }}</p>
-    <p><strong>Email:</strong> {{ emp.email }}</p>
-    <input type="number" placeholder="Base Pay" #pay class="border px-2 py-1 mt-2">
-<!--    <button (click)="generatePayment(emp.id, pay.value)"-->
-<!--            class="ml-2 px-4 py-1 bg-blue-600 text-white rounded">-->
-<!--      Generate Payment-->
-<!--    </button>-->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
+        <div class="col-span-1 bg-white border border-gray-100 rounded-xl shadow-lg p-6 flex flex-col">
+          <h2 class="text-2xl font-bold text-gray-700 mb-5 border-b pb-4">Employee List</h2>
+          <div class="relative flex-grow overflow-hidden">
+            <ul class="space-y-3 overflow-y-auto pr-2 pb-2" style="max-height: calc(100vh - 350px);">
+              <li *ngFor="let emp of employees"
+                  (click)="selectEmployee(emp)"
+                  class="cursor-pointer flex items-center p-3 rounded-lg transition duration-200 ease-in-out
+                         hover:bg-blue-50 hover:text-blue-700
+                         "
+                  [class.bg-blue-100]="selectedEmployee?.id === emp.id"
+                  [class.text-blue-800]="selectedEmployee?.id === emp.id"
+                  [class.font-semibold]="selectedEmployee?.id === emp.id">
+                <span class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full text-lg font-bold mr-4 flex-shrink-0">
+                  {{ emp.username?.charAt(0).toUpperCase() }}
+                </span>
+                <div>
+                  <p class="text-lg leading-tight">{{ emp.username }}</p>
+                  <p class="text-sm text-gray-500">{{ emp.email }}</p>
+                </div>
+              </li>
+              <li *ngIf="employees.length === 0" class="text-gray-500 text-center py-4">No employees found.</li>
+            </ul>
+            <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+          </div>
+        </div>
+
+        <div class="col-span-2 bg-white border border-gray-100 rounded-xl shadow-lg p-6">
+          <h2 class="text-2xl font-bold text-gray-700 mb-5 border-b pb-4 flex items-center justify-between">
+            <span>Employee Details</span>
+            <span *ngIf="selectedEmployee" class="text-blue-600 ml-2 text-xl">({{ selectedEmployee.username }})</span>
+          </h2>
+
+          <div *ngIf="!selectedEmployee" class="text-gray-500 text-center py-12 text-lg">
+            <p>👋 Please select an employee from the list to view their details.</p>
+          </div>
+
+          <div *ngIf="selectedEmployee">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div class="bg-blue-50 p-5 rounded-lg flex flex-col items-center justify-center text-center shadow-md">
+                <p class="text-4xl font-bold text-blue-700 mb-1">{{ attendanceSummary?.present || 0 }}</p>
+                <p class="text-gray-600 font-medium">Present Days</p>
+              </div>
+              <div class="bg-red-50 p-5 rounded-lg flex flex-col items-center justify-center text-center shadow-md">
+                <p class="text-4xl font-bold text-red-700 mb-1">{{ attendanceSummary?.absent || 0 }}</p>
+                <p class="text-gray-600 font-medium">Absent Days</p>
+              </div>
+              <div class="bg-yellow-50 p-5 rounded-lg flex flex-col items-center justify-center text-center shadow-md">
+                <p class="text-4xl font-bold text-yellow-700 mb-1">{{ attendanceSummary?.holiday || 0 }}</p>
+                <p class="text-gray-600 font-medium">Holidays</p>
+              </div>
+              <div class="bg-indigo-50 p-5 rounded-lg flex flex-col items-center justify-center text-center shadow-md">
+                <p class="text-4xl font-bold text-indigo-700 mb-1">{{ totalDaysRecorded }}</p>
+                <p class="text-gray-600 font-medium">Total Days</p>
+              </div>
+            </div>
+
+            <div *ngIf="attendanceSummary" class="mb-8 p-4 bg-gray-50 rounded-lg shadow-inner">
+              <h3 class="text-xl font-semibold text-gray-700 mb-4">Attendance Visualization</h3>
+              <div class="relative h-64 w-full">
+                <canvas baseChart
+                        [data]="barChartData"
+                        [options]="barChartOptions"
+                        [type]="barChartType">
+                </canvas>
+              </div>
+            </div>
+
+            <div class="border-t pt-6 mt-6 border-gray-100">
+              <h3 class="text-xl font-semibold text-gray-700 mb-4">Payroll Generation</h3>
+              <div class="mb-4">
+                <label for="basePay" class="block text-gray-700 text-base font-medium mb-2">Enter Base Pay (₹):</label>
+                <input type="number" id="basePay" [(ngModel)]="basePay"
+                       class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-800 leading-tight
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                       placeholder="e.g., 25000" min="0" />
+              </div>
+
+              <p *ngIf="basePay > 0" class="text-lg font-medium text-gray-800 mb-4">
+                Calculated Salary (based on Present Days):
+                <span class="text-green-600 font-bold">₹{{ calculatedSalary.toFixed(2) }}</span>
+              </p>
+
+              <button (click)="generatePayroll()"
+                      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg
+                             transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:shadow-outline"
+                      [disabled]="!selectedEmployee || basePay <= 0">
+                Generate Payroll
+              </button>
+              <p *ngIf="payrollSuccessMsg" class="mt-3 text-sm"
+                 [class.text-green-600]="payrollSuccessMsg.includes('successfully')"
+                 [class.text-red-600]="payrollSuccessMsg.includes('Failed')">
+                {{ payrollSuccessMsg }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
